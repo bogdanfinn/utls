@@ -44,8 +44,8 @@ const (
 
 	FAKE_TLS_DHE_RSA_WITH_AES_128_CBC_SHA    = uint16(0x0033)
 	FAKE_TLS_DHE_RSA_WITH_AES_256_CBC_SHA    = uint16(0x0039)
-	FAKE_TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 = uint16(0x009f)
 	FAKE_TLS_RSA_WITH_RC4_128_MD5            = uint16(0x0004)
+	FAKE_TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 = uint16(0x009f)
 	FAKE_TLS_EMPTY_RENEGOTIATION_INFO_SCSV   = uint16(0x00ff)
 )
 
@@ -106,8 +106,10 @@ const (
 	helloRandomizedNoALPN = "Randomized-NoALPN"
 	helloCustom           = "Custom"
 	helloFirefox          = "Firefox"
+	helloOpera            = "Opera"
 	helloChrome           = "Chrome"
 	helloIOS              = "iOS"
+	helloSafari           = "Safari"
 	helloAndroid          = "Android"
 
 	// versions
@@ -154,7 +156,10 @@ var (
 	HelloFirefox_99   = ClientHelloID{helloFirefox, "99", nil}
 	HelloFirefox_102  = ClientHelloID{helloFirefox, "102", nil}
 
-	HelloChrome_Auto = HelloChrome_102
+	HelloOpera_Auto = HelloOpera_89
+	HelloOpera_89   = ClientHelloID{helloOpera, "89", nil}
+
+	HelloChrome_Auto = HelloChrome_104
 	HelloChrome_58   = ClientHelloID{helloChrome, "58", nil}
 	HelloChrome_62   = ClientHelloID{helloChrome, "62", nil}
 	HelloChrome_70   = ClientHelloID{helloChrome, "70", nil}
@@ -164,12 +169,19 @@ var (
 	HelloChrome_96   = ClientHelloID{helloChrome, "96", nil}
 	HelloChrome_100  = ClientHelloID{helloChrome, "100", nil}
 	HelloChrome_102  = ClientHelloID{helloChrome, "102", nil}
+	HelloChrome_103  = ClientHelloID{helloChrome, "103", nil}
+	HelloChrome_104  = ClientHelloID{helloChrome, "104", nil}
 
-	HelloIOS_Auto = HelloIOS_14
+	HelloIOS_Auto = HelloIOS_15_5
 	HelloIOS_11_1 = ClientHelloID{helloIOS, "111", nil} // legacy "111" means 11.1
 	HelloIOS_12_1 = ClientHelloID{helloIOS, "12.1", nil}
 	HelloIOS_13   = ClientHelloID{helloIOS, "13", nil}
 	HelloIOS_14   = ClientHelloID{helloIOS, "14", nil}
+	HelloIOS_15_5 = ClientHelloID{helloIOS, "15.5", nil}
+
+	HelloSafari_Auto = HelloSafari_15_5
+	HelloSafari_15_3 = ClientHelloID{helloSafari, "15.3", nil}
+	HelloSafari_15_5 = ClientHelloID{helloSafari, "15.5", nil}
 
 	HelloAndroid_11_OkHttp = ClientHelloID{helloAndroid, "11", nil}
 )

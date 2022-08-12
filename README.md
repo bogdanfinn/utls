@@ -306,3 +306,7 @@ Please refer to [this document](./CONTRIBUTORS_GUIDE.md) if you're interested in
 
 ## Credits
 The initial development of uTLS was completed during an internship at [Google Jigsaw](https://jigsaw.google.com/). This is not an official Google product.
+
+
+#### Notes
+https://www.simonv.fr/TypesConvert/?integers
