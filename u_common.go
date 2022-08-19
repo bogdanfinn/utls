@@ -16,11 +16,11 @@ import (
 // Supported things, that have changed their ID are prefixed with "Old"
 // Supported but disabled things are prefixed with "Disabled". We will _enable_ them.
 const (
-	utlsExtensionPadding              uint16 = 21
-	utlsExtensionExtendedMasterSecret uint16 = 23 // https://tools.ietf.org/html/rfc7627
+	// utlsExtensionPadding              uint16 = 21
+	// utlsExtensionExtendedMasterSecret uint16 = 23 // https://tools.ietf.org/html/rfc7627
 
 	// https://datatracker.ietf.org/doc/html/rfc8879#section-7.1
-	utlsExtensionCompressCertificate uint16 = 27
+	// utlsExtensionCompressCertificate uint16 = 27
 
 	// extensions with 'fake' prefix break connection, if server echoes them back
 	fakeExtensionChannelID uint16 = 30032 // not IANA assigned
@@ -78,6 +78,12 @@ const (
 	PskModeDHE   uint8 = pskModeDHE
 )
 
+type ClientHelloSpecFactory func() (ClientHelloSpec, error)
+
+var EmptyClientHelloSpecFactory = func() (ClientHelloSpec, error) {
+	return ClientHelloSpec{}, fmt.Errorf("please implement this method")
+}
+
 type ClientHelloID struct {
 	Client string
 
@@ -88,6 +94,8 @@ type ClientHelloID struct {
 	// Seed is only used for randomized fingerprints to seed PRNG.
 	// Must not be modified once set.
 	Seed *PRNGSeed
+
+	SpecFactory ClientHelloSpecFactory
 }
 
 func (p *ClientHelloID) Str() string {
@@ -98,13 +106,17 @@ func (p *ClientHelloID) IsSet() bool {
 	return (p.Client == "") && (p.Version == "")
 }
 
+func (p *ClientHelloID) ToSpec() (ClientHelloSpec, error) {
+	return p.SpecFactory()
+}
+
 const (
 	// clients
 	helloGolang           = "Golang"
 	helloRandomized       = "Randomized"
 	helloRandomizedALPN   = "Randomized-ALPN"
 	helloRandomizedNoALPN = "Randomized-NoALPN"
-	helloCustom           = "Custom"
+	helloCustomInternal   = "CustomInternal"
 	helloFirefox          = "Firefox"
 	helloOpera            = "Opera"
 	helloChrome           = "Chrome"
@@ -136,54 +148,54 @@ var (
 	// overwrite your changes to Hello(Config, Session are fine).
 	// You might want to call BuildHandshakeState() before applying any changes.
 	// UConn.Extensions will be completely ignored.
-	HelloGolang = ClientHelloID{helloGolang, helloAutoVers, nil}
+	HelloGolang = ClientHelloID{helloGolang, helloAutoVers, nil, EmptyClientHelloSpecFactory}
 
 	// HelloCustom will prepare ClientHello with empty uconn.Extensions so you can fill it with
 	// TLSExtensions manually or use ApplyPreset function
-	HelloCustom = ClientHelloID{helloCustom, helloAutoVers, nil}
+	HelloCustom = ClientHelloID{helloCustomInternal, helloAutoVers, nil, EmptyClientHelloSpecFactory}
 
 	// HelloRandomized* randomly adds/reorders extensions, ciphersuites, etc.
-	HelloRandomized       = ClientHelloID{helloRandomized, helloAutoVers, nil}
-	HelloRandomizedALPN   = ClientHelloID{helloRandomizedALPN, helloAutoVers, nil}
-	HelloRandomizedNoALPN = ClientHelloID{helloRandomizedNoALPN, helloAutoVers, nil}
+	HelloRandomized       = ClientHelloID{helloRandomized, helloAutoVers, nil, EmptyClientHelloSpecFactory}
+	HelloRandomizedALPN   = ClientHelloID{helloRandomizedALPN, helloAutoVers, nil, EmptyClientHelloSpecFactory}
+	HelloRandomizedNoALPN = ClientHelloID{helloRandomizedNoALPN, helloAutoVers, nil, EmptyClientHelloSpecFactory}
 
 	// The rest will will parrot given browser.
 	HelloFirefox_Auto = HelloFirefox_102
-	HelloFirefox_55   = ClientHelloID{helloFirefox, "55", nil}
-	HelloFirefox_56   = ClientHelloID{helloFirefox, "56", nil}
-	HelloFirefox_63   = ClientHelloID{helloFirefox, "63", nil}
-	HelloFirefox_65   = ClientHelloID{helloFirefox, "65", nil}
+	HelloFirefox_55   = ClientHelloID{helloFirefox, "55", nil, EmptyClientHelloSpecFactory}
+	HelloFirefox_56   = ClientHelloID{helloFirefox, "56", nil, EmptyClientHelloSpecFactory}
+	HelloFirefox_63   = ClientHelloID{helloFirefox, "63", nil, EmptyClientHelloSpecFactory}
+	HelloFirefox_65   = ClientHelloID{helloFirefox, "65", nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_99   = ClientHelloID{helloFirefox, "99", nil}
-	HelloFirefox_102  = ClientHelloID{helloFirefox, "102", nil}
+	HelloFirefox_102  = ClientHelloID{helloFirefox, "102", nil, EmptyClientHelloSpecFactory}
 
 	HelloOpera_Auto = HelloOpera_89
-	HelloOpera_89   = ClientHelloID{helloOpera, "89", nil}
+	HelloOpera_89   = ClientHelloID{helloOpera, "89", nil, EmptyClientHelloSpecFactory}
 
 	HelloChrome_Auto = HelloChrome_104
-	HelloChrome_58   = ClientHelloID{helloChrome, "58", nil}
-	HelloChrome_62   = ClientHelloID{helloChrome, "62", nil}
-	HelloChrome_70   = ClientHelloID{helloChrome, "70", nil}
-	HelloChrome_72   = ClientHelloID{helloChrome, "72", nil}
-	HelloChrome_83   = ClientHelloID{helloChrome, "83", nil}
-	HelloChrome_87   = ClientHelloID{helloChrome, "87", nil}
-	HelloChrome_96   = ClientHelloID{helloChrome, "96", nil}
-	HelloChrome_100  = ClientHelloID{helloChrome, "100", nil}
+	HelloChrome_58   = ClientHelloID{helloChrome, "58", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_62   = ClientHelloID{helloChrome, "62", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_70   = ClientHelloID{helloChrome, "70", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_72   = ClientHelloID{helloChrome, "72", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_83   = ClientHelloID{helloChrome, "83", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_87   = ClientHelloID{helloChrome, "87", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_96   = ClientHelloID{helloChrome, "96", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_100  = ClientHelloID{helloChrome, "100", nil, EmptyClientHelloSpecFactory}
 	HelloChrome_102  = ClientHelloID{helloChrome, "102", nil}
-	HelloChrome_103  = ClientHelloID{helloChrome, "103", nil}
-	HelloChrome_104  = ClientHelloID{helloChrome, "104", nil}
+	HelloChrome_103  = ClientHelloID{helloChrome, "103", nil, EmptyClientHelloSpecFactory}
+	HelloChrome_104  = ClientHelloID{helloChrome, "104", nil, EmptyClientHelloSpecFactory}
 
 	HelloIOS_Auto = HelloIOS_15_5
-	HelloIOS_11_1 = ClientHelloID{helloIOS, "111", nil} // legacy "111" means 11.1
-	HelloIOS_12_1 = ClientHelloID{helloIOS, "12.1", nil}
-	HelloIOS_13   = ClientHelloID{helloIOS, "13", nil}
-	HelloIOS_14   = ClientHelloID{helloIOS, "14", nil}
-	HelloIOS_15_5 = ClientHelloID{helloIOS, "15.5", nil}
+	HelloIOS_11_1 = ClientHelloID{helloIOS, "111", nil, EmptyClientHelloSpecFactory} // legacy "111" means 11.1
+	HelloIOS_12_1 = ClientHelloID{helloIOS, "12.1", nil, EmptyClientHelloSpecFactory}
+	HelloIOS_13   = ClientHelloID{helloIOS, "13", nil, EmptyClientHelloSpecFactory}
+	HelloIOS_14   = ClientHelloID{helloIOS, "14", nil, EmptyClientHelloSpecFactory}
+	HelloIOS_15_5 = ClientHelloID{helloIOS, "15.5", nil, EmptyClientHelloSpecFactory}
 
 	HelloSafari_Auto = HelloSafari_15_5
-	HelloSafari_15_3 = ClientHelloID{helloSafari, "15.3", nil}
-	HelloSafari_15_5 = ClientHelloID{helloSafari, "15.5", nil}
+	HelloSafari_15_3 = ClientHelloID{helloSafari, "15.3", nil, EmptyClientHelloSpecFactory}
+	HelloSafari_15_5 = ClientHelloID{helloSafari, "15.5", nil, EmptyClientHelloSpecFactory}
 
-	HelloAndroid_11_OkHttp = ClientHelloID{helloAndroid, "11", nil}
+	HelloAndroid_11_OkHttp = ClientHelloID{helloAndroid, "11", nil, EmptyClientHelloSpecFactory}
 )
 
 // based on spec's GreaseStyle, GREASE_PLACEHOLDER may be replaced by another GREASE value

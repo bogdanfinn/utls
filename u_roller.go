@@ -64,7 +64,7 @@ func (c *Roller) Dial(network, addr, serverName string) (*UConn, error) {
 	if workingHelloId != nil {
 		helloIDFound := false
 		for i, ID := range helloIDs {
-			if ID == *workingHelloId {
+			if ID.Str() == (*workingHelloId).Str() {
 				helloIDs[i] = helloIDs[0]
 				helloIDs[0] = *workingHelloId // push working hello ID first
 				helloIDFound = true

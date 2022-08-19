@@ -149,7 +149,7 @@ func (hs *clientHandshakeStateTLS13) checkServerHelloOrHRR() error {
 		return errors.New("tls: server did not echo the legacy session ID")
 	}
 
-	if hs.serverHello.compressionMethod != compressionNone {
+	if hs.serverHello.compressionMethod != CompressionNone {
 		c.sendAlert(alertIllegalParameter)
 		return errors.New("tls: server selected unsupported compression format")
 	}
@@ -262,10 +262,10 @@ func (hs *clientHandshakeStateTLS13) processHelloRetryRequest() error {
 	// crypto/tls code above this point had changed crypto/tls structures in accordance with HRR, and is about
 	// to call default marshaller.
 	// Instead, we fill uTLS-specific structs and call uTLS marshaller.
-	// Only extensionCookie, extensionPreSharedKey, extensionKeyShare, extensionEarlyData, extensionSupportedVersions,
+	// Only ExtensionCookie, ExtensionPreSharedKey, ExtensionKeyShare, ExtensionEarlyData, ExtensionSupportedVersions,
 	// and utlsExtensionPadding are supposed to change
 	if hs.uconn != nil {
-		if hs.uconn.ClientHelloID != HelloGolang {
+		if hs.uconn.ClientHelloID.Str() != HelloGolang.Str() {
 			if len(hs.hello.pskIdentities) > 0 {
 				// TODO: wait for someone who cares about PSK to implement
 				return errors.New("uTLS does not support reprocessing of PSK key triggered by HelloRetryRequest")

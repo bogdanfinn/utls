@@ -112,7 +112,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 		}
 
 		switch extension {
-		case extensionServerName:
+		case ExtensionServerName:
 			// RFC 6066, Section 3
 			var nameList cryptobyte.String
 			if !extData.ReadUint16LengthPrefixed(&nameList) || nameList.Empty() {
@@ -141,11 +141,11 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 				clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &SNIExtension{})
 
 			}
-		case extensionNextProtoNeg:
+		case ExtensionNextProtoNeg:
 			// draft-agl-tls-nextprotoneg-04
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &NPNExtension{})
 
-		case extensionStatusRequest:
+		case ExtensionStatusRequest:
 			// RFC 4366, Section 3.6
 			var statusType uint8
 			var ignored cryptobyte.String
@@ -161,7 +161,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 				return nil, errors.New("status request extension statusType is not statusTypeOCSP")
 			}
 
-		case extensionSupportedCurves:
+		case ExtensionSupportedCurves:
 			// RFC 4492, sections 5.1.1 and RFC 8446, Section 4.2.7
 			var curvesBytes cryptobyte.String
 			if !extData.ReadUint16LengthPrefixed(&curvesBytes) || curvesBytes.Empty() {
@@ -177,7 +177,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 			}
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &SupportedCurvesExtension{curves})
 
-		case extensionSupportedPoints:
+		case ExtensionSupportedPoints:
 			// RFC 4492, Section 5.1.2
 			supportedPoints := []uint8{}
 			if !readUint8LengthPrefixed(&extData, &supportedPoints) ||
@@ -186,11 +186,11 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 			}
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &SupportedPointsExtension{supportedPoints})
 
-		case extensionSessionTicket:
+		case ExtensionSessionTicket:
 			// RFC 5077, Section 3.2
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &SessionTicketExtension{})
 
-		case extensionSignatureAlgorithms:
+		case ExtensionSignatureAlgorithms:
 			// RFC 5246, Section 7.4.1.4.1
 			var sigAndAlgs cryptobyte.String
 			if !extData.ReadUint16LengthPrefixed(&sigAndAlgs) || sigAndAlgs.Empty() {
@@ -207,7 +207,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 			}
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &SignatureAlgorithmsExtension{supportedSignatureAlgorithms})
 
-		case extensionSignatureAlgorithmsCert:
+		case ExtensionSignatureAlgorithmsCert:
 			// RFC 8446, Section 4.2.3
 			if f.AllowBluntMimicry {
 				clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &GenericExtension{extension, extData})
@@ -215,11 +215,11 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 				return nil, errors.New("unsupported extension SignatureAlgorithmsCert")
 			}
 
-		case extensionRenegotiationInfo:
+		case ExtensionRenegotiationInfo:
 			// RFC 5746, Section 3.2
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &RenegotiationInfoExtension{RenegotiateOnceAsClient})
 
-		case extensionALPN:
+		case ExtensionALPN:
 			// RFC 7301, Section 3.1
 			var protoList cryptobyte.String
 			if !extData.ReadUint16LengthPrefixed(&protoList) || protoList.Empty() {
@@ -236,11 +236,11 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 			}
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &ALPNExtension{alpnProtocols})
 
-		case extensionSCT:
+		case ExtensionSCT:
 			// RFC 6962, Section 3.3.1
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &SCTExtension{})
 
-		case extensionSupportedVersions:
+		case ExtensionSupportedVersions:
 			// RFC 8446, Section 4.2.1
 			var versList cryptobyte.String
 			if !extData.ReadUint8LengthPrefixed(&versList) || versList.Empty() {
@@ -259,7 +259,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 			clientHelloSpec.TLSVersMin = 0
 			clientHelloSpec.TLSVersMax = 0
 
-		case extensionKeyShare:
+		case ExtensionKeyShare:
 			// RFC 8446, Section 4.2.8
 			var clientShares cryptobyte.String
 			if !extData.ReadUint16LengthPrefixed(&clientShares) {
@@ -284,7 +284,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 			}
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &KeyShareExtension{keyShares})
 
-		case extensionPSKModes:
+		case ExtensionPSKModes:
 			// RFC 8446, Section 4.2.9
 			// TODO: PSK Modes have their own form of GREASE-ing which is not currently implemented
 			// the current functionality will NOT re-GREASE/re-randomize these values when using a fingerprinted spec
@@ -296,14 +296,14 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 			}
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &PSKKeyExchangeModesExtension{pskModes})
 
-		case utlsExtensionExtendedMasterSecret:
+		case ExtensionExtendedMasterSecret:
 			// https://tools.ietf.org/html/rfc7627
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &UtlsExtendedMasterSecretExtension{})
 
-		case utlsExtensionPadding:
+		case ExtensionPadding:
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &UtlsPaddingExtension{GetPaddingLen: BoringPaddingStyle})
 
-		case utlsExtensionCompressCertificate:
+		case ExtensionCompressCertificate:
 			methods := []CertCompressionAlgo{}
 			methodsRaw := new(cryptobyte.String)
 			if !extData.ReadUint8LengthPrefixed(methodsRaw) {
@@ -321,7 +321,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 		case fakeExtensionChannelID, fakeRecordSizeLimit:
 			clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &GenericExtension{extension, extData})
 
-		case extensionPreSharedKey:
+		case ExtensionPreSharedKey:
 			// RFC 8446, Section 4.2.11
 			if f.KeepPSK {
 				clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &GenericExtension{extension, extData})
@@ -329,7 +329,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 				return nil, errors.New("unsupported extension PreSharedKey")
 			}
 
-		case extensionCookie:
+		case ExtensionCookie:
 			// RFC 8446, Section 4.2.2
 			if f.AllowBluntMimicry {
 				clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &GenericExtension{extension, extData})
@@ -337,7 +337,7 @@ func (f *Fingerprinter) FingerprintClientHello(data []byte) (*ClientHelloSpec, e
 				return nil, errors.New("unsupported extension Cookie")
 			}
 
-		case extensionEarlyData:
+		case ExtensionEarlyData:
 			// RFC 8446, Section 4.2.10
 			if f.AllowBluntMimicry {
 				clientHelloSpec.Extensions = append(clientHelloSpec.Extensions, &GenericExtension{extension, extData})

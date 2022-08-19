@@ -9,6 +9,10 @@ If you have any questions, bug reports or contributions, you are welcome to publ
 Documentation below may not keep up with all the changes and new features at all times,
 so you are encouraged to use [godoc](https://godoc.org/github.com/refraction-networking/utls#UConn).
 
+# Attention
+This is a fork of `github.com/refraction-networking/utls` for `https://github.com/bogdanfinn/tls-client`. 
+I introduced some compatability breaks with the original `utls` package in order to add some custom logic for my tls-client.
+
 # Features
 ## Low-level access to handshake
 * Read/write access to all bits of client hello message.  

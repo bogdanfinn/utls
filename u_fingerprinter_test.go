@@ -210,7 +210,7 @@ func checkUTLSFingerPrintClientHello(t *testing.T, clientHelloID ClientHelloID, 
 	}
 
 	// We can't effectively check the extensions on randomized client hello ids
-	if !(clientHelloID == HelloRandomized || clientHelloID == HelloRandomizedALPN || clientHelloID == HelloRandomizedNoALPN) {
+	if !(clientHelloID.Str() == HelloRandomized.Str() || clientHelloID.Str() == HelloRandomizedALPN.Str() || clientHelloID.Str() == HelloRandomizedNoALPN.Str()) {
 		for i, originalExtension := range uconn.Extensions {
 			if _, ok := originalExtension.(*UtlsPaddingExtension); ok {
 				// We can't really compare padding extensions in this way
@@ -515,7 +515,7 @@ func TestUTLSFingerprintClientHelloKeepPSK(t *testing.T) {
 
 	for _, ext := range generatedSpec.Extensions {
 		if genericExtension, ok := (ext).(*GenericExtension); ok {
-			if genericExtension.Id == extensionPreSharedKey {
+			if genericExtension.Id == ExtensionPreSharedKey {
 				return
 			}
 		}

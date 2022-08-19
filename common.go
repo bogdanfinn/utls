@@ -73,31 +73,35 @@ const (
 
 // TLS compression types.
 const (
-	compressionNone uint8 = 0
+	CompressionNone uint8 = 0
 )
 
 // TLS extension numbers
 const (
-	extensionServerName              uint16 = 0
-	extensionStatusRequest           uint16 = 5
-	extensionSupportedCurves         uint16 = 10 // supported_groups in TLS 1.3, see RFC 8446, Section 4.2.7
-	extensionSupportedPoints         uint16 = 11
-	extensionSignatureAlgorithms     uint16 = 13
-	extensionALPN                    uint16 = 16
-	extensionSCT                     uint16 = 18
-	extensionDelegatedCredentials    uint16 = 34
-	extensionSessionTicket           uint16 = 35
-	extensionPreSharedKey            uint16 = 41
-	extensionEarlyData               uint16 = 42
-	extensionSupportedVersions       uint16 = 43
-	extensionCookie                  uint16 = 44
-	extensionPSKModes                uint16 = 45
-	extensionCertificateAuthorities  uint16 = 47
-	extensionSignatureAlgorithmsCert uint16 = 50
-	extensionKeyShare                uint16 = 51
-	extensionNextProtoNeg            uint16 = 13172 // not IANA assigned
-	extensionALPS                    uint16 = 17513
-	extensionRenegotiationInfo       uint16 = 0xff01
+	ExtensionServerName              uint16 = 0
+	ExtensionStatusRequest           uint16 = 5
+	ExtensionSupportedCurves         uint16 = 10 // supported_groups in TLS 1.3, see RFC 8446, Section 4.2.7
+	ExtensionSupportedPoints         uint16 = 11
+	ExtensionSignatureAlgorithms     uint16 = 13
+	ExtensionALPN                    uint16 = 16
+	ExtensionSCT                     uint16 = 18
+	ExtensionPadding                 uint16 = 21
+	ExtensionExtendedMasterSecret    uint16 = 23 // https://tools.ietf.org/html/rfc7627
+	ExtensionCompressCertificate     uint16 = 27 // https://datatracker.ietf.org/doc/html/rfc8879#section-7.1
+	ExtensionRecordSizeLimit         uint16 = 28
+	ExtensionDelegatedCredentials    uint16 = 34
+	ExtensionSessionTicket           uint16 = 35
+	ExtensionPreSharedKey            uint16 = 41
+	ExtensionEarlyData               uint16 = 42
+	ExtensionSupportedVersions       uint16 = 43
+	ExtensionCookie                  uint16 = 44
+	ExtensionPSKModes                uint16 = 45
+	ExtensionCertificateAuthorities  uint16 = 47
+	ExtensionSignatureAlgorithmsCert uint16 = 50
+	ExtensionKeyShare                uint16 = 51
+	ExtensionNextProtoNeg            uint16 = 13172 // not IANA assigned
+	ExtensionALPS                    uint16 = 17513
+	ExtensionRenegotiationInfo       uint16 = 65281
 )
 
 // TLS signaling cipher suite values

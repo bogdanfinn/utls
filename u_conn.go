@@ -65,7 +65,7 @@ func UClient(conn net.Conn, config *Config, clientHelloID ClientHelloID) *UConn 
 // amd should only be called explicitly to inspect/change fields of
 // default/mimicked ClientHello.
 func (uconn *UConn) BuildHandshakeState() error {
-	if uconn.ClientHelloID == HelloGolang {
+	if uconn.ClientHelloID.Str() == HelloGolang.Str() {
 		if uconn.ClientHelloBuilt {
 			return nil
 		}
@@ -175,7 +175,7 @@ func (uconn *UConn) SetSNI(sni string) {
 // RemoveSNIExtension removes SNI from the list of extensions sent in ClientHello
 // It returns an error when used with HelloGolang ClientHelloID
 func (uconn *UConn) RemoveSNIExtension() error {
-	if uconn.ClientHelloID == HelloGolang {
+	if uconn.ClientHelloID.Str() == HelloGolang.Str() {
 		return fmt.Errorf("Cannot call RemoveSNIExtension on a UConn with a HelloGolang ClientHelloID")
 	}
 	uconn.omitSNIExtension = true

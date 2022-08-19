@@ -198,7 +198,7 @@ Curves:
 	foundCompression := false
 	// We only support null compression, so check that the client offered it.
 	for _, compression := range hs.clientHello.compressionMethods {
-		if compression == compressionNone {
+		if compression == CompressionNone {
 			foundCompression = true
 			break
 		}
@@ -233,7 +233,7 @@ Curves:
 	}
 
 	hs.hello.secureRenegotiationSupported = hs.clientHello.secureRenegotiationSupported
-	hs.hello.compressionMethod = compressionNone
+	hs.hello.compressionMethod = CompressionNone
 	if len(hs.clientHello.serverName) > 0 {
 		c.serverName = hs.clientHello.serverName
 	}
