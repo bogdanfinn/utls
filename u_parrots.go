@@ -559,11 +559,11 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 					PskModeDHE,
 				}},
 				&SupportedVersionsExtension{[]uint16{
-					//GREASE_PLACEHOLDER,
+					GREASE_PLACEHOLDER,
 					VersionTLS13,
 					VersionTLS12,
-					VersionTLS11,
-					VersionTLS10,
+					//VersionTLS11,
+					//VersionTLS10,
 				}},
 				&UtlsCompressCertExtension{[]CertCompressionAlgo{
 					CertCompressionBrotli,
@@ -692,7 +692,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 				&FakeRecordSizeLimitExtension{0x4001},
 				&UtlsPaddingExtension{GetPaddingLen: BoringPaddingStyle},
 			}}, nil
-	case HelloChrome_102:
+	case HelloChrome_102.Str():
 		return ClientHelloSpec{
 			CipherSuites: []uint16{
 				GREASE_PLACEHOLDER,
@@ -764,7 +764,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 			},
 		}, nil
 
-	case HelloFirefox_99:
+	case HelloFirefox_99.Str():
 		return ClientHelloSpec{
 			TLSVersMin: VersionTLS10,
 			TLSVersMax: VersionTLS13,
@@ -789,7 +789,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 				TLS_RSA_WITH_3DES_EDE_CBC_SHA,
 			},
 			CompressionMethods: []byte{
-				compressionNone,
+				CompressionNone,
 			},
 			Extensions: []TLSExtension{
 				&SNIExtension{},                      //server_name
@@ -846,7 +846,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 				&FakeRecordSizeLimitExtension{Limit: 0x4001},             //record_size_limit
 				&UtlsPaddingExtension{GetPaddingLen: BoringPaddingStyle}, //padding
 			}}, nil
-	case HelloFirefox_102:
+	case HelloFirefox_102.Str():
 		return ClientHelloSpec{
 			TLSVersMin: VersionTLS10,
 			TLSVersMax: VersionTLS13,
@@ -870,7 +870,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 				TLS_RSA_WITH_AES_256_CBC_SHA,
 			},
 			CompressionMethods: []byte{
-				compressionNone,
+				CompressionNone,
 			},
 			Extensions: []TLSExtension{
 				&SNIExtension{},                      //server_name
@@ -1645,7 +1645,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 				&UtlsPaddingExtension{GetPaddingLen: BoringPaddingStyle},
 			},
 		}, nil
-	case HelloIOS_13:
+	case HelloIOS_13.Str():
 		return ClientHelloSpec{
 			CipherSuites: []uint16{
 				TLS_AES_128_GCM_SHA256,
@@ -1722,7 +1722,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 				&UtlsPaddingExtension{GetPaddingLen: BoringPaddingStyle},
 			},
 		}, nil
-	case HelloIOS_14:
+	case HelloIOS_14.Str():
 		return ClientHelloSpec{
 			// TLSVersMax: VersionTLS12,
 			// TLSVersMin: VersionTLS10,
@@ -1807,7 +1807,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 				&UtlsPaddingExtension{GetPaddingLen: BoringPaddingStyle},
 			},
 		}, nil
-	case HelloAndroid_11_OkHttp:
+	case HelloAndroid_11_OkHttp.Str():
 		return ClientHelloSpec{
 			CipherSuites: []uint16{
 				TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,

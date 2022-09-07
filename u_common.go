@@ -165,7 +165,7 @@ var (
 	HelloFirefox_56   = ClientHelloID{helloFirefox, "56", nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_63   = ClientHelloID{helloFirefox, "63", nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_65   = ClientHelloID{helloFirefox, "65", nil, EmptyClientHelloSpecFactory}
-	HelloFirefox_99   = ClientHelloID{helloFirefox, "99", nil}
+	HelloFirefox_99   = ClientHelloID{helloFirefox, "99", nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_102  = ClientHelloID{helloFirefox, "102", nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_104  = ClientHelloID{helloFirefox, "104", nil, EmptyClientHelloSpecFactory}
 
@@ -182,7 +182,7 @@ var (
 	HelloChrome_87   = ClientHelloID{helloChrome, "87", nil, EmptyClientHelloSpecFactory}
 	HelloChrome_96   = ClientHelloID{helloChrome, "96", nil, EmptyClientHelloSpecFactory}
 	HelloChrome_100  = ClientHelloID{helloChrome, "100", nil, EmptyClientHelloSpecFactory}
-	HelloChrome_102  = ClientHelloID{helloChrome, "102", nil}
+	HelloChrome_102  = ClientHelloID{helloChrome, "102", nil, EmptyClientHelloSpecFactory}
 	HelloChrome_103  = ClientHelloID{helloChrome, "103", nil, EmptyClientHelloSpecFactory}
 	HelloChrome_104  = ClientHelloID{helloChrome, "104", nil, EmptyClientHelloSpecFactory}
 	HelloChrome_105  = ClientHelloID{helloChrome, "105", nil, EmptyClientHelloSpecFactory}
