@@ -10,7 +10,7 @@ package cpu_test
 import (
 	"testing"
 
-	. "github.com/bogdanfinn/utls/cpu"
+	. "github.com/pitagoras530/utls/cpu"
 )
 
 func TestX86ifAVX2hasAVX(t *testing.T) {
