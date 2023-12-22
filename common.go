@@ -1471,39 +1471,47 @@ const (
 )
 
 func (c *Config) writeKeyLog(label string, clientRandom, secret []byte) error {
-	sslKeyLogFile := os.Getenv("SSLKEYLOGFILE")
-	fmt.Println("[KEYLOG] Writing keylog to: " + sslKeyLogFile)
-	var f *os.File
-	var err error
-	if c.KeyLogWriter == nil && sslKeyLogFile != "" {
-		f, err = os.OpenFile(sslKeyLogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-		if err != nil {
-			fmt.Println("[KEYLOG] Error opening keylog file: " + err.Error())
-			return err
-		}
-		c.KeyLogWriter = f
-	}
-
-	if c.KeyLogWriter == nil {
+	sslKeyLogFilePath := os.Getenv("SSLKEYLOGFILE")
+	if c.KeyLogWriter == nil && sslKeyLogFilePath == "" { // aborting early to save CPU
 		return nil
 	}
 
+	// if we're here, that means that we want to write a log line either to the
+	// c.KeyLogWriter or to the file pointed at by $SSLKEYLOGFILE
 	logLine := fmt.Appendf(nil, "%s %x %x\n", label, clientRandom, secret)
 
 	writerMutex.Lock()
-	_, err = c.KeyLogWriter.Write(logLine)
-	if err != nil {
-		return err
-	}
-	if f != nil {
-		err = f.Close()
+	// A: write to the provided c.KeyLogWriter
+	if c.KeyLogWriter != nil {
+		_, err := c.KeyLogWriter.Write(logLine)
 		if err != nil {
+			return err
+		}
+	}
+	// B: write to the env SSLKEYLOGFILE
+	if sslKeyLogFilePath != "" {
+		fmt.Println("[KEYLOG] Writing SSLKEYLOG to: " + sslKeyLogFilePath)
+		sslKeyLogFile, err := os.OpenFile(sslKeyLogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+		if err != nil {
+			fmt.Println("[KEYLOG] Error opening SSLKEYLOG file: " + err.Error())
+			return err
+		}
+		_, err = sslKeyLogFile.Write(logLine)
+		if err != nil {
+			fmt.Println("[KEYLOG] Error writing SSLKEYLOG file: " + err.Error())
+			return err
+		}
+		// closing the file to make sure that everything get's flushed to disk
+		// yes, this will
+		err = sslKeyLogFile.Close()
+		if err != nil {
+			fmt.Println("[KEYLOG] Error closing SSLKEYLOG file: " + err.Error())
 			return err
 		}
 	}
 	writerMutex.Unlock()
 
-	return err
+	return nil
 }
 
 // writerMutex protects all KeyLogWriters globally. It is rarely enabled,
