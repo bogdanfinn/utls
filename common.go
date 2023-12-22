@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -1470,6 +1471,19 @@ const (
 )
 
 func (c *Config) writeKeyLog(label string, clientRandom, secret []byte) error {
+	sslKeyLogFile := os.Getenv("SSLKEYLOGFILE")
+	fmt.Println("[KEYLOG] Writing keylog to: " + sslKeyLogFile)
+	var f *os.File
+	var err error
+	if c.KeyLogWriter == nil && sslKeyLogFile != "" {
+		f, err = os.OpenFile(sslKeyLogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+		if err != nil {
+			fmt.Println("[KEYLOG] Error opening keylog file: " + err.Error())
+			return err
+		}
+		c.KeyLogWriter = f
+	}
+
 	if c.KeyLogWriter == nil {
 		return nil
 	}
@@ -1477,7 +1491,16 @@ func (c *Config) writeKeyLog(label string, clientRandom, secret []byte) error {
 	logLine := fmt.Appendf(nil, "%s %x %x\n", label, clientRandom, secret)
 
 	writerMutex.Lock()
-	_, err := c.KeyLogWriter.Write(logLine)
+	_, err = c.KeyLogWriter.Write(logLine)
+	if err != nil {
+		return err
+	}
+	if f != nil {
+		err = f.Close()
+		if err != nil {
+			return err
+		}
+	}
 	writerMutex.Unlock()
 
 	return err
