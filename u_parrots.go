@@ -5,6 +5,7 @@
 package tls
 
 import (
+	"crypto/ecdh" // [FIX] Add this import
 	"crypto/mlkem"
 	crand "crypto/rand"
 	"crypto/sha256"
@@ -3440,6 +3441,15 @@ func (uconn *UConn) ApplyPreset(p *ClientHelloSpec) error {
 			}
 		case *KeyShareExtension:
 			preferredCurveIsSet := false
+
+			// [FIX START] Initialize the map to store all generated keys
+			if uconn.HandshakeState.State13.KeyShareKeys == nil {
+				// Ensure struct is initialized if it wasn't already (though usually it is by makeClientHelloForApplyPreset)
+				uconn.HandshakeState.State13.KeyShareKeys = &KeySharePrivateKeys{}
+			}
+			uconn.HandshakeState.State13.KeyShareKeys.Keys = make(map[CurveID]*ecdh.PrivateKey)
+			// [FIX END]
+
 			for i := range ext.KeyShares {
 				curveID := ext.KeyShares[i].Group
 				if isGREASEUint16(uint16(curveID)) { // just in case the user set a GREASE value instead of unGREASEd
@@ -3477,6 +3487,10 @@ func (uconn *UConn) ApplyPreset(p *ClientHelloSpec) error {
 						return fmt.Errorf("unsupported Curve in KeyShareExtension: %v."+
 							"To mimic it, fill the Data(key) field manually", curveID)
 					}
+
+					// [FIX START] Always store the key in the map
+					uconn.HandshakeState.State13.KeyShareKeys.Keys[curveID] = ecdheKey
+					// [FIX END]
 
 					ext.KeyShares[i].Data = ecdheKey.PublicKey().Bytes()
 					if !preferredCurveIsSet {
