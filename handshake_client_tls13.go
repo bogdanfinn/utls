@@ -598,7 +598,28 @@ func (hs *clientHandshakeStateTLS13) establishHandshakeKeys() error {
 		}
 		ecdhePeerData = hs.serverHello.serverShare.data[:x25519PublicKeySize]
 	}
-	sharedKey, err := getSharedKey(ecdhePeerData, hs.keyShareKeys.ecdhe)
+
+	// [FIX START] - Dynamic Key Selection
+	// We lookup the correct private key for the group selected by the server.
+	selectedGroup := hs.serverHello.serverShare.group
+	var clientKey *ecdh.PrivateKey
+
+	// 1. Try to find the key in our new map (added in u_public.go)
+	if k, ok := hs.keyShareKeys.keys[selectedGroup]; ok {
+		clientKey = k
+	} else {
+		// 2. Fallback to the legacy single field.
+		clientKey = hs.keyShareKeys.ecdhe
+	}
+	
+	// 3. Last resort fallback for MLKEM if map wasn't populated for it
+	if clientKey == nil && (selectedGroup == X25519MLKEM768 || selectedGroup == X25519Kyber768Draft00) {
+		clientKey = hs.keyShareKeys.mlkemEcdhe
+	}
+
+	sharedKey, err := getSharedKey(ecdhePeerData, clientKey)
+	// [FIX END]
+
 	// [uTLS] SECTION END
 	if err != nil {
 		c.sendAlert(alertIllegalParameter)
