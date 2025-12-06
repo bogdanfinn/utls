@@ -892,6 +892,8 @@ type KeySharePrivateKeys struct {
 	Ecdhe      *ecdh.PrivateKey
 	mlkem      *mlkem.DecapsulationKey768
 	mlkemEcdhe *ecdh.PrivateKey
+	// [FIX] Ensure this field is present
+	Keys       map[CurveID]*ecdh.PrivateKey 
 }
 
 func (ksp *KeySharePrivateKeys) ToPrivate() *keySharePrivateKeys {
@@ -903,6 +905,8 @@ func (ksp *KeySharePrivateKeys) ToPrivate() *keySharePrivateKeys {
 		ecdhe:      ksp.Ecdhe,
 		mlkem:      ksp.mlkem,
 		mlkemEcdhe: ksp.mlkemEcdhe,
+		// [FIX] Copy the map
+		keys:       ksp.Keys,
 	}
 }
 
@@ -915,5 +919,7 @@ func (ksp *keySharePrivateKeys) ToPublic() *KeySharePrivateKeys {
 		Ecdhe:      ksp.ecdhe,
 		mlkem:      ksp.mlkem,
 		mlkemEcdhe: ksp.mlkemEcdhe,
+		// [FIX] Copy the map
+		Keys:       ksp.keys,
 	}
 }
