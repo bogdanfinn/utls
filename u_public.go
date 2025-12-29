@@ -11,8 +11,6 @@ import (
 	"crypto/x509"
 	"hash"
 	"time"
-
-	"github.com/cloudflare/circl/kem"
 )
 
 // ClientHandshakeState includes both TLS 1.3-only and TLS 1.2-only states,
@@ -286,7 +284,7 @@ type PubServerHelloMsg struct {
 
 	// 1.3
 	SupportedVersion        uint16
-	ServerShare             keyShare
+	ServerShare             KeyShare
 	SelectedIdentityPresent bool
 	SelectedIdentity        uint16
 	Cookie                  []byte  // HelloRetryRequest extension
@@ -315,7 +313,7 @@ func (shm *PubServerHelloMsg) getPrivatePtr() *serverHelloMsg {
 			secureRenegotiationSupported: shm.SecureRenegotiationSupported,
 			alpnProtocol:                 shm.AlpnProtocol,
 			supportedVersion:             shm.SupportedVersion,
-			serverShare:                  shm.ServerShare,
+			serverShare:                  shm.ServerShare.ToPrivate(),
 			selectedIdentityPresent:      shm.SelectedIdentityPresent,
 			selectedIdentity:             shm.SelectedIdentity,
 			cookie:                       shm.Cookie,
@@ -345,7 +343,7 @@ func (shm *serverHelloMsg) getPublicPtr() *PubServerHelloMsg {
 			SecureRenegotiationSupported: shm.secureRenegotiationSupported,
 			AlpnProtocol:                 shm.alpnProtocol,
 			SupportedVersion:             shm.supportedVersion,
-			ServerShare:                  shm.serverShare,
+			ServerShare:                  shm.serverShare.ToPublic(),
 			SelectedIdentityPresent:      shm.selectedIdentityPresent,
 			SelectedIdentity:             shm.selectedIdentity,
 			Cookie:                       shm.cookie,
@@ -633,20 +631,28 @@ type KeyShare struct {
 	Data  []byte  `json:"key_exchange,omitempty"` // optional
 }
 
+func (ks KeyShare) ToPrivate() keyShare {
+	return keyShare{group: ks.Group, data: ks.Data}
+}
+
+func (ks keyShare) ToPublic() KeyShare {
+	return KeyShare{Group: ks.group, Data: ks.data}
+}
+
 type KeyShares []KeyShare
 type keyShares []keyShare
 
 func (kss keyShares) ToPublic() []KeyShare {
 	var KSS []KeyShare
 	for _, ks := range kss {
-		KSS = append(KSS, KeyShare{Data: ks.data, Group: ks.group})
+		KSS = append(KSS, ks.ToPublic())
 	}
 	return KSS
 }
 func (KSS KeyShares) ToPrivate() []keyShare {
 	var kss []keyShare
 	for _, KS := range KSS {
-		kss = append(kss, keyShare{data: KS.Data, group: KS.Group})
+		kss = append(kss, KS.ToPrivate())
 	}
 	return kss
 }
@@ -854,14 +860,14 @@ func (TKS TicketKeys) ToPrivate() []ticketKey {
 }
 
 type kemPrivateKey struct {
-	secretKey kem.PrivateKey
+	secretKey any
 	curveID   CurveID
 }
 
 // Deprecated: Use KeySharePrivateKeys instead. This type is no longer used.
 // Will be removed in the future.
 type KemPrivateKey struct {
-	SecretKey kem.PrivateKey
+	SecretKey any
 	CurveID   CurveID
 }
 
@@ -894,6 +900,8 @@ type KeySharePrivateKeys struct {
 	mlkemEcdhe *ecdh.PrivateKey
 	// [FIX] Ensure this field is present
 	Keys       map[CurveID]*ecdh.PrivateKey 
+	Mlkem      *mlkem.DecapsulationKey768
+	MlkemEcdhe *ecdh.PrivateKey
 }
 
 func (ksp *KeySharePrivateKeys) ToPrivate() *keySharePrivateKeys {
@@ -907,6 +915,8 @@ func (ksp *KeySharePrivateKeys) ToPrivate() *keySharePrivateKeys {
 		mlkemEcdhe: ksp.mlkemEcdhe,
 		// [FIX] Copy the map
 		keys:       ksp.Keys,
+		mlkem:      ksp.Mlkem,
+		mlkemEcdhe: ksp.MlkemEcdhe,
 	}
 }
 
@@ -921,5 +931,7 @@ func (ksp *keySharePrivateKeys) ToPublic() *KeySharePrivateKeys {
 		mlkemEcdhe: ksp.mlkemEcdhe,
 		// [FIX] Copy the map
 		Keys:       ksp.keys,
+		Mlkem:      ksp.mlkem,
+		MlkemEcdhe: ksp.mlkemEcdhe,
 	}
 }

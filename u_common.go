@@ -730,6 +730,7 @@ type Weights struct {
 	Extensions_Append_EMS                              float64
 	FirstKeyShare_Set_CurveP256                        float64
 	Extensions_Append_ALPS_Old                         float64
+	KeyShare_Append_RandomGroups                       float64
 	Extensions_Append_ALPS                             float64
 }
 
@@ -751,6 +752,8 @@ var DefaultWeights = Weights{
 	Extensions_Append_Reneg:                            0.75,
 	Extensions_Append_EMS:                              0.77,
 	FirstKeyShare_Set_CurveP256:                        0.25,
+	FirstKeyShare_Set_CurveP256:                        0.00, // legacy setting
+	KeyShare_Append_RandomGroups:                       0.50,
 	Extensions_Append_ALPS_Old:                         0.33,
 	Extensions_Append_ALPS:                             0.33,
 }

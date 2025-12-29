@@ -1304,6 +1304,7 @@ func (m *newSessionTicketMsgTLS13) unmarshal(data []byte) bool {
 }
 
 type certificateRequestMsgTLS13 struct {
+	original                         []byte // [uTLS]
 	ocspStapling                     bool
 	scts                             bool
 	supportedSignatureAlgorithms     []SignatureScheme
@@ -1372,7 +1373,7 @@ func (m *certificateRequestMsgTLS13) marshal() ([]byte, error) {
 }
 
 func (m *certificateRequestMsgTLS13) unmarshal(data []byte) bool {
-	*m = certificateRequestMsgTLS13{}
+	*m = certificateRequestMsgTLS13{original: data} // [uTLS]
 	s := cryptobyte.String(data)
 
 	var context, extensions cryptobyte.String
@@ -1446,6 +1447,13 @@ func (m *certificateRequestMsgTLS13) unmarshal(data []byte) bool {
 
 	return true
 }
+
+// [UTLS SECTION BEGINS]
+func (m *certificateRequestMsgTLS13) originalBytes() []byte {
+	return m.original
+}
+
+// [UTLS SECTION ENDS]
 
 type certificateMsg struct {
 	certificates [][]byte
