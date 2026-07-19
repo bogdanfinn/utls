@@ -1122,6 +1122,40 @@ func (c *Conn) readHandshake(transcript transcriptHash) (any, error) {
 	return c.unmarshalHandshakeMessage(data, transcript)
 }
 
+// [UTLS SECTION BEGINS]
+// readHandshakeRaw behaves like readHandshake(nil) but also returns the exact wire bytes
+// of the message. Callers that only learn after parsing whether a message must be hashed
+// into the handshake transcript (the TLS 1.3 server Certificate, which may arrive either
+// compressed or not) use it to feed the *original* bytes to the transcript rather than a
+// re-marshaled copy — re-marshaling is not guaranteed to reproduce the peer's bytes, and
+// any divergence makes the CertificateVerify signature fail to verify.
+func (c *Conn) readHandshakeRaw() (any, []byte, error) {
+	if err := c.readHandshakeBytes(4); err != nil {
+		return nil, nil, err
+	}
+	data := c.hand.Bytes()
+
+	maxHandshakeSize := maxHandshake
+	if c.haveVers && data[0] == typeCertificate {
+		maxHandshakeSize = maxHandshakeCertificateMsg
+	}
+
+	n := int(data[1])<<16 | int(data[2])<<8 | int(data[3])
+	if n > maxHandshakeSize {
+		c.sendAlertLocked(alertInternalError)
+		return nil, nil, c.in.setErrorLocked(fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes", n, maxHandshakeSize))
+	}
+	if err := c.readHandshakeBytes(4 + n); err != nil {
+		return nil, nil, err
+	}
+	data = c.hand.Next(4 + n)
+	raw := append([]byte(nil), data...)
+	m, err := c.unmarshalHandshakeMessage(data, nil)
+	return m, raw, err
+}
+
+// [UTLS SECTION ENDS]
+
 func (c *Conn) unmarshalHandshakeMessage(data []byte, transcript transcriptHash) (handshakeMessage, error) {
 	var m handshakeMessage
 	switch data[0] {

@@ -719,7 +719,12 @@ func (hs *clientHandshakeStateTLS13) readServerCertificate() error {
 
 	// [UTLS SECTION BEGINS]
 	// msg, err := c.readHandshake(hs.transcript)
-	msg, err := c.readHandshake(nil) // hold writing to transcript until we know it is not compressed cert
+	// Hold writing to the transcript until we know whether this is a compressed cert:
+	// a compressed cert must be hashed as the CompressedCertificate message it arrived
+	// as, so we capture the raw bytes and hash them ourselves once we know. readHandshakeRaw
+	// returns those exact bytes so we never hash a re-marshaled copy (which is not
+	// guaranteed to reproduce the peer's bytes and would break CertificateVerify).
+	msg, rawMsg, err := c.readHandshakeRaw()
 	// [UTLS SECTION ENDS]
 	if err != nil {
 		return err
@@ -728,10 +733,9 @@ func (hs *clientHandshakeStateTLS13) readServerCertificate() error {
 	certReq, ok := msg.(*certificateRequestMsgTLS13)
 	if ok {
 		hs.certReq = certReq
-		transcriptMsg(certReq, hs.transcript) // [UTLS] if it is certReq (not compressedCert), write to transcript
+		hs.transcript.Write(rawMsg) // [UTLS] certReq is never compressed: hash its exact wire bytes
 
-		// msg, err = c.readHandshake(hs.transcript)
-		msg, err = c.readHandshake(nil) // [UTLS] we don't write to transcript until make sure it is not compressed cert
+		msg, rawMsg, err = c.readHandshakeRaw() // [UTLS] again defer hashing until we know (un)compressed
 		if err != nil {
 			return err
 		}
@@ -761,10 +765,8 @@ func (hs *clientHandshakeStateTLS13) readServerCertificate() error {
 		return errors.New("tls: received empty certificates message")
 	}
 	// [UTLS SECTION BEGINS]
-	if !skipWritingCertToTranscript { // write to transcript only if it is not compressedCert (i.e. if not processed by extension)
-		if err = transcriptMsg(certMsg, hs.transcript); err != nil {
-			return err
-		}
+	if !skipWritingCertToTranscript { // hash only if not a compressedCert (compressed is hashed by utlsReadServerCertificate)
+		hs.transcript.Write(rawMsg) // [UTLS] hash the cert's exact wire bytes, not a re-marshaled copy
 	}
 	// [UTLS SECTION ENDS]
 
