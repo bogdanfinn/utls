@@ -12,8 +12,8 @@ import (
 // handshake message whose leaf certificate carries an extension that
 // marshalCertificate does not re-emit (it only re-emits OCSP and SCT).
 // Re-marshaling therefore drops the extension, so a transcript computed from
-// the re-marshal diverges from the server's — which made CertificateVerify
-// fail with "crypto/rsa: verification error" against ciam.tui.transunion.com.
+// the re-marshal diverges from the peer's — which makes CertificateVerify fail
+// with "crypto/rsa: verification error".
 func buildTLS13CertificateWithLeafExtension() []byte {
 	var b cryptobyte.Builder
 	b.AddUint8(typeCertificate)
