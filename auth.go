@@ -54,6 +54,14 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 		if err := rsa.VerifyPSS(pubKey, hashFunc, signed, sig, signOpts); err != nil {
 			return err
 		}
+	case signatureMLDSA:
+		// ML-DSA signs the message directly (no pre-hash), like Ed25519.
+		if hashFunc != directSigning {
+			return errors.New("tls: ML-DSA requires direct signing")
+		}
+		if err := verifyMLDSAHandshakeSignature(pubkey, signed, sig); err != nil {
+			return err
+		}
 	default:
 		return errors.New("internal error: unknown signature type")
 	}
@@ -105,6 +113,8 @@ func typeAndHashFromSignatureScheme(signatureAlgorithm SignatureScheme) (sigType
 		sigType = signatureECDSA
 	case Ed25519:
 		sigType = signatureEd25519
+	case MLDSA44, MLDSA65, MLDSA87:
+		sigType = signatureMLDSA
 	default:
 		return 0, 0, fmt.Errorf("unsupported signature algorithm: %v", signatureAlgorithm)
 	}
@@ -118,6 +128,8 @@ func typeAndHashFromSignatureScheme(signatureAlgorithm SignatureScheme) (sigType
 	case PKCS1WithSHA512, PSSWithSHA512, ECDSAWithP521AndSHA512:
 		hash = crypto.SHA512
 	case Ed25519:
+		hash = directSigning
+	case MLDSA44, MLDSA65, MLDSA87:
 		hash = directSigning
 	default:
 		return 0, 0, fmt.Errorf("unsupported signature algorithm: %v", signatureAlgorithm)

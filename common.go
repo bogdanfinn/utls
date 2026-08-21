@@ -218,6 +218,7 @@ const (
 	signatureECDSA
 	signatureEd25519
 	signatureEdDilithium3
+	signatureMLDSA
 )
 
 // directSigning is a standard Hash value that signals that no pre-hashing
@@ -424,6 +425,12 @@ const (
 
 	// EdDSA algorithms.
 	Ed25519 SignatureScheme = 0x0807
+
+	// ML-DSA (FIPS 204) post-quantum signature algorithms. Defined for TLS 1.3
+	// only (see draft-ietf-tls-mldsa). Advertised by Chrome 150+.
+	MLDSA44 SignatureScheme = 0x0904
+	MLDSA65 SignatureScheme = 0x0905
+	MLDSA87 SignatureScheme = 0x0906
 
 	// Legacy signature and hash algorithms for TLS 1.2.
 	PKCS1WithSHA1 SignatureScheme = 0x0201

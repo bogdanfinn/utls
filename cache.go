@@ -82,7 +82,10 @@ func (cc *certCache) newCert(der []byte) (*activeCert, error) {
 		return cc.active(entry.(*cacheEntry)), nil
 	}
 
-	cert, err := x509.ParseCertificate(der)
+	// parseCertificate is x509.ParseCertificate plus ML-DSA public-key
+	// recovery (Go's stdlib x509 cannot yet parse ML-DSA SPKI). With the
+	// nomldsa build tag it is exactly x509.ParseCertificate.
+	cert, err := parseCertificate(der)
 	if err != nil {
 		return nil, err
 	}
