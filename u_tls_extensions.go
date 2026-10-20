@@ -79,6 +79,8 @@ func ExtensionFromID(id uint16) TLSExtension {
 		return &FakeChannelIDExtension{}
 	case utlsExtensionECH:
 		return &GREASEEncryptedClientHelloExtension{}
+	case utlsExtensionTrustAnchors:
+		return &TrustAnchorsExtension{}
 	case ExtensionRenegotiationInfo:
 		return &RenegotiationInfoExtension{}
 	default:
@@ -621,8 +623,12 @@ type ALPNExtension struct {
 }
 
 func (e *ALPNExtension) writeToUConn(uc *UConn) error {
-	uc.config.NextProtos = e.AlpnProtocols
-	uc.HandshakeState.Hello.AlpnProtocols = e.AlpnProtocols
+	// Do not overwrite NextProtos in config if Encrypted Client Hello is used.
+	// Config ALPN will be written to inner Hello
+	if uc.config.EncryptedClientHelloConfigList == nil {
+		uc.config.NextProtos = e.AlpnProtocols
+		uc.HandshakeState.Hello.AlpnProtocols = e.AlpnProtocols
+	}
 	return nil
 }
 
@@ -854,7 +860,7 @@ func (e *SCTExtension) writeToUConn(uc *UConn) error {
 	return nil
 }
 
-// why 6 ? https://github.com/refraction-networking/utls/compare/master...Mathtin:utls:master
+// why 6 ? https://github.com/bogdanfinn/utls/compare/master...Mathtin:utls:master
 func (e *SCTExtension) Len() int {
 	return 4
 }
@@ -974,10 +980,14 @@ const (
 	ssl_grease_extension1
 	ssl_grease_extension2
 	ssl_grease_version
-	ssl_grease_signature_algorithm
 	ssl_grease_ticket_extension
-	ssl_grease_last_index = ssl_grease_ticket_extension
+	ssl_grease_ech_config_id
+	ssl_grease_signature_algorithm
+	ssl_grease_seed_count
 )
+
+// Preserve the array size accepted by the exported GetBoringGREASEValue helper.
+const ssl_grease_last_index = ssl_grease_ticket_extension
 
 // it is responsibility of user not to generate multiple grease extensions with same value
 type UtlsGREASEExtension struct {
@@ -991,6 +1001,10 @@ func (e *UtlsGREASEExtension) writeToUConn(uc *UConn) error {
 
 // will panic if ssl_grease_last_index[index] is out of bounds.
 func GetBoringGREASEValue(greaseSeed [ssl_grease_last_index]uint16, index int) uint16 {
+	return getBoringGREASEValue(greaseSeed[:], index)
+}
+
+func getBoringGREASEValue(greaseSeed []uint16, index int) uint16 {
 	// GREASE value is back from deterministic to random.
 	// https://github.com/google/boringssl/blob/a365138ac60f38b64bfc608b493e0f879845cb88/ssl/handshake_client.c#L530
 	ret := uint16(greaseSeed[index])
@@ -1429,7 +1443,7 @@ func (e *PSKKeyExchangeModesExtension) Write(b []byte) (int, error) {
 	// RFC 8446, Section 4.2.9
 	// TODO: PSK Modes have their own form of GREASE-ing which is not currently implemented
 	// the current functionality will NOT re-GREASE/re-randomize these values when using a fingerprinted spec
-	// https://github.com/refraction-networking/utls/pull/58#discussion_r522354105
+	// https://github.com/bogdanfinn/utls/pull/58#discussion_r522354105
 	// https://tools.ietf.org/html/draft-ietf-tls-grease-01#section-2
 	pskModes := []uint8{}
 	if !readUint8LengthPrefixed(&extData, &pskModes) {

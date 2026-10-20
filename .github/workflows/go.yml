@@ -30,11 +30,13 @@ jobs:
 
       - name: gofmt
         run: |
-          unformatted="$(gofmt -l .)"
+          # certificates_test.go is generated and compared byte-for-byte by TestGenerateCertificates,
+          # so it must stay exactly as the generator writes it.
+          unformatted="$(gofmt -l . | grep -vx 'certificates_test.go' || true)"
           if [ -n "$unformatted" ]; then
             echo "::error::These files are not gofmt'ed:"
             echo "$unformatted"
-            gofmt -d .
+            echo "$unformatted" | xargs gofmt -d
             exit 1
           fi
 

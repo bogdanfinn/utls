@@ -41,6 +41,7 @@ const (
 	utlsFakeExtensionCustom             uint16 = 1234   // not IANA assigned, for ALPS
 	utlsExtensionECH                    uint16 = 0xfe0d // draft-ietf-tls-esni-17
 	utlsExtensionECHOuterExtensions     uint16 = 0xfd00 // draft-ietf-tls-esni-17
+	utlsExtensionTrustAnchors           uint16 = 0xca34 // draft-ietf-tls-trust-anchor-ids
 
 	// extensions with 'fake' prefix break connection, if server echoes them back
 	FakeExtensionEncryptThenMAC       uint16 = 22
@@ -621,7 +622,7 @@ var (
 	HelloRandomizedNoALPN = ClientHelloID{helloRandomizedNoALPN, false, helloAutoVers, nil, nil, EmptyClientHelloSpecFactory}
 
 	// The rest will will parrot given browser.
-	HelloFirefox_Auto = HelloFirefox_120
+	HelloFirefox_Auto = HelloFirefox_148
 	HelloFirefox_55   = ClientHelloID{helloFirefox, false, "55", nil, nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_56   = ClientHelloID{helloFirefox, false, "56", nil, nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_63   = ClientHelloID{helloFirefox, false, "63", nil, nil, EmptyClientHelloSpecFactory}
@@ -634,8 +635,9 @@ var (
 	HelloFirefox_110  = ClientHelloID{helloFirefox, false, "110", nil, nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_105  = ClientHelloID{helloFirefox, false, "105", nil, nil, EmptyClientHelloSpecFactory}
 	HelloFirefox_120  = ClientHelloID{helloFirefox, false, "120", nil, nil, EmptyClientHelloSpecFactory}
+	HelloFirefox_148  = ClientHelloID{helloFirefox, false, "148", nil, nil, EmptyClientHelloSpecFactory}
 
-	HelloChrome_Auto        = HelloChrome_133
+	HelloChrome_Auto        = HelloChrome_155
 	HelloChrome_58          = ClientHelloID{helloChrome, false, "58", nil, nil, EmptyClientHelloSpecFactory}
 	HelloChrome_62          = ClientHelloID{helloChrome, false, "62", nil, nil, EmptyClientHelloSpecFactory}
 	HelloChrome_70          = ClientHelloID{helloChrome, false, "70", nil, nil, EmptyClientHelloSpecFactory}
@@ -682,6 +684,9 @@ var (
 	HelloChrome_110 = ClientHelloID{helloChrome, false, "110", nil, nil, EmptyClientHelloSpecFactory}
 	HelloChrome_111 = ClientHelloID{helloChrome, false, "111", nil, nil, EmptyClientHelloSpecFactory}
 	HelloChrome_112 = ClientHelloID{helloChrome, false, "112", nil, nil, EmptyClientHelloSpecFactory}
+	// Chrome 155.0.8059.40 on macOS, with ML-DSA signatures and a snapshot of
+	// the Chrome Root Store trust anchor IDs. See testdata/chrome155_clienthello.md.
+	HelloChrome_155 = ClientHelloID{helloChrome, false, "155", nil, nil, EmptyClientHelloSpecFactory}
 
 	HelloIOS_Auto = HelloIOS_16_0
 	HelloIOS_11_1 = ClientHelloID{helloIOS, false, "111", nil, nil, EmptyClientHelloSpecFactory} // legacy "111" means 11.1
@@ -695,9 +700,10 @@ var (
 	HelloIPad_Auto = HelloIPad_15_6
 	HelloIPad_15_6 = ClientHelloID{helloIPad, false, "15.6", nil, nil, EmptyClientHelloSpecFactory}
 
-	HelloSafari_Auto   = HelloSafari_16_0
+	HelloSafari_Auto   = HelloSafari_26_3
 	HelloSafari_15_6_1 = ClientHelloID{helloSafari, false, "15.6.1", nil, nil, EmptyClientHelloSpecFactory}
 	HelloSafari_16_0   = ClientHelloID{helloSafari, false, "16.0", nil, nil, EmptyClientHelloSpecFactory}
+	HelloSafari_26_3   = ClientHelloID{helloSafari, false, "26.3", nil, nil, EmptyClientHelloSpecFactory}
 
 	HelloAndroid_11_OkHttp = ClientHelloID{helloAndroid, false, "11", nil, nil, EmptyClientHelloSpecFactory}
 

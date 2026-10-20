@@ -111,7 +111,7 @@ func TestSignatureAlgorithmsGREASEMatchesSeed(t *testing.T) {
 		}
 	}
 
-	want := SignatureScheme(GetBoringGREASEValue(uconn.greaseSeed, ssl_grease_signature_algorithm))
+	want := SignatureScheme(getBoringGREASEValue(uconn.greaseSeed[:], ssl_grease_signature_algorithm))
 	if got != want {
 		t.Errorf("substituted signature algorithm = %#04x, want the seeded value %#04x", uint16(got), uint16(want))
 	}
