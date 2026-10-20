@@ -38,7 +38,7 @@ func TestUTLSECHPreSharedKeyPrivacy(t *testing.T) {
 			if tc.realECH {
 				config.EncryptedClientHelloConfigList = echConfigs
 			}
-			client := UClient(nil, config, HelloChrome_120)
+			client := UClient(nil, config, HelloChrome_120, false, false, false)
 			if err := client.BuildHandshakeStateWithoutSession(); err != nil {
 				t.Fatal(err)
 			}
@@ -121,7 +121,7 @@ func TestUTLSECHCachedSessionPrivacy(t *testing.T) {
 				t.Fatal(err)
 			}
 			preset.Extensions = append(preset.Extensions, &UtlsPreSharedKeyExtension{})
-			client := UClient(nil, config, HelloCustom)
+			client := UClient(nil, config, HelloCustom, false, false, false)
 			if err := client.ApplyPreset(&preset); err != nil {
 				t.Fatal(err)
 			}

@@ -14,7 +14,7 @@ import (
 	"hash"
 	"io"
 
-	"github.com/refraction-networking/utls/internal/tls13"
+	"github.com/bogdanfinn/utls/internal/tls13"
 )
 
 // This file contains the functions necessary to compute the TLS 1.3 key
@@ -57,6 +57,8 @@ type keySharePrivateKeys struct {
 	mlkem crypto.Decapsulator
 
 	mlkemEcdhe *ecdh.PrivateKey // [uTLS] seperate ecdhe key for pq keyshare in line with Chrome, instead of reusing ecdhe key like stdlib
+	// [FIX] Add this field
+	keys map[CurveID]*ecdh.PrivateKey
 }
 
 // A keyExchange implements a TLS 1.3 KEM.
@@ -196,6 +198,9 @@ func (ke *ecdhKeyExchange) clientSharedSecretChooseEcdhe(priv *keySharePrivateKe
 			return nil, errors.New("tls: missing separate hybrid ECDHE private key")
 		}
 		ecdhe = priv.mlkemEcdhe
+	} else if key, ok := priv.keys[ke.id]; ok {
+		// the server may select any of the offered classical key shares, not just the first one
+		ecdhe = key
 	}
 	if ecdhe == nil {
 		return nil, errors.New("tls: missing ECDHE private key")

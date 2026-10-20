@@ -1,5 +1,5 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+# Builds, vets and tests the Go project.
+# See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
 name: "Go"
 
@@ -9,22 +9,80 @@ on:
   pull_request:
     branches: ["master"]
 
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same branch / PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  lint:
+    name: "Vet & Format"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: gofmt
+        run: |
+          # certificates_test.go is generated and compared byte-for-byte by TestGenerateCertificates,
+          # so it must stay exactly as the generator writes it.
+          unformatted="$(gofmt -l . | grep -vx 'certificates_test.go' || true)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::These files are not gofmt'ed:"
+            echo "$unformatted"
+            echo "$unformatted" | xargs gofmt -d
+            exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go mod tidy is up to date
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+
   build:
+    name: "Build & Test (${{ matrix.os }})"
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
-        go: ["1.27.x"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-go@v7.0.0
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
-          go-version: ${{ matrix.go }}
-          cache-dependency-path: go.sum
+          # Single source of truth: the go / toolchain directive in go.mod.
+          go-version-file: "go.mod"
+          cache: true
+
       - run: go version
+
       - name: Build
         run: go build -v ./...
+
+      - name: Typecheck tests
+        run: go vet ./...
+
       - name: Test
         run: go test -v ./...
+
+  race:
+    name: "Test (race detector)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Test with race detector
+        run: go test -race ./...

@@ -42,8 +42,8 @@ func (e *SessionTicketExtension) Read(b []byte) (int, error) {
 
 	extBodyLen := e.Len() - 4
 
-	b[0] = byte(extensionSessionTicket >> 8)
-	b[1] = byte(extensionSessionTicket)
+	b[0] = byte(ExtensionSessionTicket >> 8)
+	b[1] = byte(ExtensionSessionTicket)
 	b[2] = byte(extBodyLen >> 8)
 	b[3] = byte(extBodyLen)
 	if extBodyLen > 0 {

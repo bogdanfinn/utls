@@ -23,7 +23,7 @@ type UQUICConn struct {
 // UQUICClient returns a new TLS client side connection using QUICTransport as the
 // underlying transport. The config cannot be nil.
 func UQUICClient(config *QUICConfig, clientHelloID ClientHelloID) *UQUICConn {
-	return newUQUICConn(UClient(nil, config.TLSConfig, clientHelloID), config)
+	return newUQUICConn(UClient(nil, config.TLSConfig, clientHelloID, false, false, false), config)
 }
 
 func newUQUICConn(uconn *UConn, config *QUICConfig) *UQUICConn {

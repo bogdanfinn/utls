@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/refraction-networking/utls/internal/cryptotest"
-	"github.com/refraction-networking/utls/internal/fips140tls"
-	"github.com/refraction-networking/utls/internal/testenv"
+	"github.com/bogdanfinn/utls/internal/cryptotest"
+	"github.com/bogdanfinn/utls/internal/fips140tls"
+	"github.com/bogdanfinn/utls/internal/testenv"
 )
 
 func TestSignatureSelection(t *testing.T) {

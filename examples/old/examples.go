@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"time"
 
-	tls "github.com/refraction-networking/utls"
+	tls "github.com/bogdanfinn/utls"
 	"golang.org/x/net/http2"
 )
 
@@ -41,7 +41,7 @@ func HttpGetByHelloID(hostname string, addr string, helloID tls.ClientHelloID) (
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn := tls.UClient(dialConn, &config, helloID)
+	uTlsConn := tls.UClient(dialConn, &config, helloID, false, false, false)
 	defer uTlsConn.Close()
 
 	err = uTlsConn.Handshake()
@@ -59,7 +59,7 @@ func HttpGetConsistentRandomized(hostname string, addr string) (*http.Response, 
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn := tls.UClient(tcpConn, &config, tls.HelloRandomized)
+	uTlsConn := tls.UClient(tcpConn, &config, tls.HelloRandomized, false, false, false)
 	defer uTlsConn.Close()
 	err = uTlsConn.Handshake()
 	if err != nil {
@@ -73,7 +73,7 @@ func HttpGetConsistentRandomized(hostname string, addr string) (*http.Response, 
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn2 := tls.UClient(tcpConn2, &config, uTlsConn.ClientHelloID)
+	uTlsConn2 := tls.UClient(tcpConn2, &config, uTlsConn.ClientHelloID, false, false, false)
 	defer uTlsConn2.Close()
 	err = uTlsConn2.Handshake()
 	if err != nil {
@@ -88,7 +88,7 @@ func HttpGetExplicitRandom(hostname string, addr string) (*http.Response, error)
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn := tls.UClient(dialConn, nil, tls.HelloGolang)
+	uTlsConn := tls.UClient(dialConn, nil, tls.HelloGolang, false, false, false)
 	defer uTlsConn.Close()
 
 	uTlsConn.SetSNI(hostname) // have to set SNI, if config was nil
@@ -122,7 +122,7 @@ func HttpGetTicket(hostname string, addr string) (*http.Response, error) {
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn := tls.UClient(dialConn, &config, tls.HelloGolang)
+	uTlsConn := tls.UClient(dialConn, &config, tls.HelloGolang, false, false, false)
 	defer uTlsConn.Close()
 
 	err = uTlsConn.BuildHandshakeState()
@@ -162,7 +162,7 @@ func HttpGetTicketHelloID(hostname string, addr string, helloID tls.ClientHelloI
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn := tls.UClient(dialConn, &config, helloID)
+	uTlsConn := tls.UClient(dialConn, &config, helloID, false, false, false)
 	defer uTlsConn.Close()
 
 	masterSecret := make([]byte, 48)
@@ -192,7 +192,7 @@ func HttpGetCustom(hostname string, addr string) (*http.Response, error) {
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn := tls.UClient(dialConn, &config, tls.HelloCustom)
+	uTlsConn := tls.UClient(dialConn, &config, tls.HelloCustom, false, false, false)
 	defer uTlsConn.Close()
 
 	// do not use this particular spec in production
@@ -291,7 +291,7 @@ func forgeConn() {
 		return
 	}
 
-	clientUtls := tls.UClient(clientTcp, nil, tls.HelloGolang)
+	clientUtls := tls.UClient(clientTcp, nil, tls.HelloGolang, false, false, false)
 	defer clientUtls.Close()
 	clientUtls.SetSNI("google.com") // have to set SNI, if config was nil
 	err = clientUtls.Handshake()

@@ -216,8 +216,8 @@ func readPskIntoBytes(b []byte, identities []PskIdentity, binders [][]byte) (int
 		return 0, io.ErrShortBuffer
 	}
 
-	b[0] = byte(extensionPreSharedKey >> 8)
-	b[1] = byte(extensionPreSharedKey)
+	b[0] = byte(ExtensionPreSharedKey >> 8)
+	b[1] = byte(ExtensionPreSharedKey)
 	b[2] = byte((extLen - 4) >> 8)
 	b[3] = byte(extLen - 4)
 

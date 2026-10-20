@@ -13,6 +13,10 @@ You can contact one of developers personally via gaukas.wang@colorado.edu.
 Documentation below may not keep up with all the changes and new features at all times,
 so you are encouraged to use [godoc](https://godoc.org/github.com/refraction-networking/utls#UConn).
 
+# Attention
+This is a fork of `github.com/refraction-networking/utls` for `https://github.com/bogdanfinn/tls-client`. 
+I introduced some compatability breaks with the original `utls` package in order to add some custom logic for my tls-client.
+
 *Note: Information provided below in this README.md could be obsolete. We welcome 
 any contributions to refresh the documentations in addition to code contributions.*
 
@@ -321,3 +325,7 @@ Please refer to [this document](./CONTRIBUTORS_GUIDE.md) if you're interested in
 
 ## Credits
 The initial development of uTLS was completed during an internship at [Google Jigsaw](https://jigsaw.google.com/). This is not an official Google product.
+
+
+#### Notes
+https://www.simonv.fr/TypesConvert/?integers

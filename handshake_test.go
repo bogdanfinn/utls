@@ -24,8 +24,8 @@ import (
 	"testing/cryptotest"
 	"time"
 
-	"github.com/refraction-networking/utls/internal/boring"
-	"github.com/refraction-networking/utls/internal/testenv"
+	"github.com/bogdanfinn/utls/internal/boring"
+	"github.com/bogdanfinn/utls/internal/testenv"
 )
 
 // TLS reference tests run a connection against a reference implementation
@@ -483,7 +483,7 @@ func testUtlsHandshake(t *testing.T, clientConfig, serverConfig *Config, spec *C
 			io.Reader
 		}
 		if spec != nil {
-			ucli := UClient(c, clientConfig, HelloCustom)
+			ucli := UClient(c, clientConfig, HelloCustom, false, false, false)
 			if err := ucli.ApplyPreset(spec); err != nil {
 				errChan <- fmt.Errorf("client preset: %v", err)
 				c.Close()

@@ -51,7 +51,7 @@ func newTestUConnWithIncrementingRand() *UConn {
 	return UClient(&net.TCPConn{}, &Config{
 		ServerName: "example.com",
 		Rand:       &incrementingSource{},
-	}, HelloCustom)
+	}, HelloCustom, false, false, false)
 }
 
 func fingerprintsWithHybridClassicalKeyShareReuse() []ClientHelloID {
@@ -103,7 +103,7 @@ func TestHybridClassicalKeySharesAreIndependentByDefault(t *testing.T) {
 		CipherSuites: []uint16{
 			TLS_AES_128_GCM_SHA256,
 		},
-		CompressionMethods: []uint8{compressionNone},
+		CompressionMethods: []uint8{CompressionNone},
 		Extensions: []TLSExtension{
 			&SupportedCurvesExtension{
 				Curves: []CurveID{
@@ -160,7 +160,7 @@ func TestClientHelloSpecCloneDeepCopy(t *testing.T) {
 	cachedLength := 17
 	spec := &ClientHelloSpec{
 		CipherSuites:       []uint16{TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384},
-		CompressionMethods: []uint8{compressionNone},
+		CompressionMethods: []uint8{CompressionNone},
 		TLSVersMin:         VersionTLS12,
 		TLSVersMax:         VersionTLS13,
 		GetSessionID:       sha256.Sum256,
@@ -251,7 +251,7 @@ func TestApplyPresetDoesNotMutateOriginalSpec(t *testing.T) {
 		CipherSuites: []uint16{
 			TLS_AES_128_GCM_SHA256,
 		},
-		CompressionMethods: []uint8{compressionNone},
+		CompressionMethods: []uint8{CompressionNone},
 		Extensions: []TLSExtension{
 			&SupportedCurvesExtension{
 				Curves: []CurveID{

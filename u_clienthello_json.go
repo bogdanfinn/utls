@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/refraction-networking/utls/dicttls"
+	"github.com/bogdanfinn/utls/dicttls"
 )
 
 var ErrUnknownExtension = errors.New("extension name is unknown to the dictionary")
@@ -118,7 +118,7 @@ func (e *TLSExtensionsJSONUnmarshaler) UnmarshalJSON(jsonStr []byte) error {
 			}
 
 			switch extID {
-			case extensionPreSharedKey:
+			case ExtensionPreSharedKey:
 				// PSK extension, need to see if we do real or fake PSK
 				if e.UseRealPSK {
 					ext = &UtlsPreSharedKeyExtension{}

@@ -37,7 +37,7 @@ func TestUQUICDefaultMinVersion(t *testing.T) {
 			if client.conn.quic.clientHelloInfoConn != infoConn {
 				t.Fatal("UQUICClient did not retain ClientHelloInfoConn")
 			}
-			if helloID == HelloCustom {
+			if helloID.Str() == HelloCustom.Str() {
 				preset := go127ClientHelloSpec([]SignatureScheme{ECDSAWithP256AndSHA256})
 				preset.Extensions = append(preset.Extensions,
 					&ALPNExtension{AlpnProtocols: []string{"h3"}},
@@ -187,8 +187,8 @@ func TestUTLSMLKEM1024(t *testing.T) {
 				clientConn, serverConn := localPipe(t)
 				defer clientConn.Close()
 				defer serverConn.Close()
-				client := UClient(clientConn, clientConfig, helloID)
-				if helloID == HelloCustom {
+				client := UClient(clientConn, clientConfig, helloID, false, false, false)
+				if helloID.Str() == HelloCustom.Str() {
 					preset := go127ClientHelloSpec([]SignatureScheme{ECDSAWithP256AndSHA256})
 					for _, extension := range preset.Extensions {
 						switch extension := extension.(type) {
@@ -212,7 +212,7 @@ func TestUTLSMLKEM1024(t *testing.T) {
 					// Go prefers ML-KEM to X25519. Advertise ML-KEM after building
 					// the initial X25519 share to exercise the retry path explicitly.
 					clientConfig.CurvePreferences = []CurveID{X25519, MLKEM1024}
-					if helloID == HelloGolang {
+					if helloID.Str() == HelloGolang.Str() {
 						client.HandshakeState.Hello.SupportedCurves = append(client.HandshakeState.Hello.SupportedCurves, MLKEM1024)
 					}
 				}
@@ -316,7 +316,7 @@ func TestUTLSHelloGolangECHResumption(t *testing.T) {
 		clientConn, serverConn := localPipe(t)
 		defer clientConn.Close()
 		defer serverConn.Close()
-		client := UClient(clientConn, clientConfig, HelloGolang)
+		client := UClient(clientConn, clientConfig, HelloGolang, false, false, false)
 		server := Server(serverConn, serverConfig)
 		serverResult := make(chan error, 1)
 		go func() {

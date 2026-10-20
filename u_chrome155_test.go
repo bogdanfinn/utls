@@ -208,7 +208,7 @@ func chrome155FixtureServerName(t *testing.T, raw map[uint16][]byte) string {
 
 func chrome155Build(t *testing.T, id ClientHelloID, serverName string, spec *ClientHelloSpec) *UConn {
 	t.Helper()
-	client := UClient(&net.TCPConn{}, &Config{ServerName: serverName, ClientSessionCache: nil}, id)
+	client := UClient(&net.TCPConn{}, &Config{ServerName: serverName, ClientSessionCache: nil}, id, false, false, false)
 	if spec != nil {
 		if err := client.ApplyPreset(spec); err != nil {
 			t.Fatal(err)
@@ -228,7 +228,7 @@ func chrome155CompareWire(t *testing.T, want, got chrome155WireHello) {
 }
 
 func TestChrome155CapturedClientHello(t *testing.T) {
-	if HelloChrome_Auto != HelloChrome_155 {
+	if HelloChrome_Auto.Str() != HelloChrome_155.Str() {
 		t.Fatalf("HelloChrome_Auto = %s, want %s", HelloChrome_Auto.Str(), HelloChrome_155.Str())
 	}
 	want, _, captured := chrome155ParseWire(t, chrome155Fixture(t))
@@ -333,7 +333,7 @@ func TestChrome155MLDSAHandshake(t *testing.T) {
 			serverConfig.Certificates = []Certificate{tc.cert}
 			serverConfig.SessionTicketsDisabled = true
 			clientConn, serverConn := localPipe(t)
-			client, server := UClient(clientConn, clientConfig, HelloChrome_155), Server(serverConn, serverConfig)
+			client, server := UClient(clientConn, clientConfig, HelloChrome_155, false, false, false), Server(serverConn, serverConfig)
 			clientResult := make(chan error, 1)
 			go func() { clientResult <- client.Handshake() }()
 			serverErr := server.Handshake()
@@ -364,7 +364,7 @@ func TestChrome155SignatureGREASESeed(t *testing.T) {
 	client := UClient(&net.TCPConn{}, &Config{
 		ServerName: "example.com",
 		Rand:       &incrementingSource{next: 0x81},
-	}, HelloChrome_155)
+	}, HelloChrome_155, false, false, false)
 	if err := client.BuildHandshakeState(); err != nil {
 		t.Fatal(err)
 	}

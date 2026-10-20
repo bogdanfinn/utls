@@ -925,8 +925,11 @@ func (kpk *kemPrivateKey) ToPublic() *KemPrivateKey {
 
 type KeySharePrivateKeys struct {
 	// CurveID    CurveID
-	Ecdhe      *ecdh.PrivateKey
-	Mlkem      crypto.Decapsulator
+	Ecdhe *ecdh.PrivateKey
+	Mlkem crypto.Decapsulator
+	// Keys holds the classical private key per offered key share group, so the
+	// key matching the group selected by the server can be used.
+	Keys       map[CurveID]*ecdh.PrivateKey
 	MlkemEcdhe *ecdh.PrivateKey
 }
 
@@ -937,6 +940,7 @@ func (ksp *KeySharePrivateKeys) ToPrivate() *keySharePrivateKeys {
 	return &keySharePrivateKeys{
 		// curveID:    ksp.CurveID,
 		ecdhe:      ksp.Ecdhe,
+		keys:       ksp.Keys,
 		mlkem:      ksp.Mlkem,
 		mlkemEcdhe: ksp.MlkemEcdhe,
 	}
@@ -949,6 +953,7 @@ func (ksp *keySharePrivateKeys) ToPublic() *KeySharePrivateKeys {
 	return &KeySharePrivateKeys{
 		// CurveID:    ksp.curveID,
 		Ecdhe:      ksp.ecdhe,
+		Keys:       ksp.keys,
 		Mlkem:      ksp.mlkem,
 		MlkemEcdhe: ksp.mlkemEcdhe,
 	}

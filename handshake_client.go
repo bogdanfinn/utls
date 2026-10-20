@@ -24,8 +24,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/refraction-networking/utls/internal/fips140tls"
-	"github.com/refraction-networking/utls/internal/tls13"
+	"github.com/bogdanfinn/utls/internal/fips140tls"
+	"github.com/bogdanfinn/utls/internal/tls13"
 )
 
 type clientHandshakeState struct {
@@ -74,14 +74,14 @@ func (c *Conn) makeClientHello() (*clientHelloMsg, *keySharePrivateKeys, *echCli
 
 	hello := &clientHelloMsg{
 		vers:                         maxVersion,
-		compressionMethods:           []uint8{compressionNone},
+		compressionMethods:           []uint8{CompressionNone},
 		random:                       make([]byte, 32),
 		extendedMasterSecret:         true,
 		ocspStapling:                 true,
 		scts:                         true,
 		serverName:                   hostnameInSNI(config.ServerName),
 		supportedCurves:              config.curvePreferences(maxVersion),
-		supportedPoints:              []uint8{pointFormatUncompressed},
+		supportedPoints:              []uint8{PointFormatUncompressed},
 		secureRenegotiationSupported: true,
 		alpnProtocols:                config.NextProtos,
 		supportedVersions:            supportedVersions,
@@ -916,7 +916,7 @@ func (hs *clientHandshakeState) processServerHello() (bool, error) {
 		return false, err
 	}
 
-	if hs.serverHello.compressionMethod != compressionNone {
+	if hs.serverHello.compressionMethod != CompressionNone {
 		c.sendAlert(alertIllegalParameter)
 		return false, errors.New("tls: server selected unsupported compression format")
 	}
@@ -924,7 +924,7 @@ func (hs *clientHandshakeState) processServerHello() (bool, error) {
 	supportsPointFormat := false
 	offeredNonCompressedFormat := false
 	for _, format := range hs.serverHello.supportedPoints {
-		if format == pointFormatUncompressed {
+		if format == PointFormatUncompressed {
 			supportsPointFormat = true
 		} else {
 			offeredNonCompressedFormat = true

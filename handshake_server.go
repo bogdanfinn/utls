@@ -19,7 +19,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/refraction-networking/utls/internal/fips140tls"
+	"github.com/bogdanfinn/utls/internal/fips140tls"
 )
 
 // serverHandshakeState contains details of a server handshake in progress.
@@ -32,6 +32,7 @@ type serverHandshakeState struct {
 	suite        *cipherSuite
 	ecdheOk      bool
 	ecSignOk     bool
+	ellipticOk   bool
 	rsaDecryptOk bool
 	rsaSignOk    bool
 	sessionState *SessionState
@@ -223,7 +224,7 @@ func (hs *serverHandshakeState) processClientHello() error {
 	foundCompression := false
 	// We only support null compression, so check that the client offered it.
 	for _, compression := range hs.clientHello.compressionMethods {
-		if compression == compressionNone {
+		if compression == CompressionNone {
 			foundCompression = true
 			break
 		}
@@ -259,7 +260,7 @@ func (hs *serverHandshakeState) processClientHello() error {
 
 	hs.hello.extendedMasterSecret = hs.clientHello.extendedMasterSecret
 	hs.hello.secureRenegotiationSupported = hs.clientHello.secureRenegotiationSupported
-	hs.hello.compressionMethod = compressionNone
+	hs.hello.compressionMethod = CompressionNone
 	if len(hs.clientHello.serverName) > 0 {
 		c.serverName = hs.clientHello.serverName
 	}
@@ -298,7 +299,7 @@ func (hs *serverHandshakeState) processClientHello() error {
 		//
 		// Per RFC 4492, section 5.1.2, implementations MUST support the
 		// uncompressed point format. See golang.org/issue/31943.
-		hs.hello.supportedPoints = []uint8{pointFormatUncompressed}
+		hs.hello.supportedPoints = []uint8{PointFormatUncompressed}
 	}
 
 	if priv, ok := hs.cert.PrivateKey.(crypto.Signer); ok {
@@ -378,7 +379,7 @@ func supportsECDHE(c *Config, version uint16, supportedCurves []CurveID, support
 	supportsPointFormat := false
 	offeredNonCompressedFormat := false
 	for _, pointFormat := range supportedPoints {
-		if pointFormat == pointFormatUncompressed {
+		if pointFormat == PointFormatUncompressed {
 			supportsPointFormat = true
 		} else {
 			offeredNonCompressedFormat = true

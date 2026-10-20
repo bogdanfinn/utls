@@ -14,7 +14,7 @@ import (
 	"os"
 	"time"
 
-	tls "github.com/refraction-networking/utls"
+	tls "github.com/bogdanfinn/utls"
 	"golang.org/x/net/http2"
 )
 
@@ -58,7 +58,7 @@ func HttpGetCustom(hostname string, addr string) (*http.Response, error) {
 	if err != nil {
 		return nil, fmt.Errorf("net.DialTimeout error: %+v", err)
 	}
-	uTlsConn := tls.UClient(dialConn, &config, tls.HelloCustom)
+	uTlsConn := tls.UClient(dialConn, &config, tls.HelloCustom, false, false, false)
 	// uTlsConn := tls.Client(dialConn, &config)
 	defer uTlsConn.Close()
 

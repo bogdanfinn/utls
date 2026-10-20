@@ -18,7 +18,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/refraction-networking/utls/internal/tls13"
+	"github.com/bogdanfinn/utls/internal/tls13"
 )
 
 type clientHandshakeStateTLS13 struct {
@@ -213,7 +213,7 @@ func (hs *clientHandshakeStateTLS13) checkServerHelloOrHRR() error {
 		return errors.New("tls: server did not echo the legacy session ID")
 	}
 
-	if hs.serverHello.compressionMethod != compressionNone {
+	if hs.serverHello.compressionMethod != CompressionNone {
 		c.sendAlert(alertDecodeError)
 		return errors.New("tls: server sent non-zero legacy TLS compression method")
 	}
@@ -382,10 +382,10 @@ func (hs *clientHandshakeStateTLS13) processHelloRetryRequest() error {
 	// crypto/tls code above this point had changed crypto/tls structures in accordance with HRR, and is about
 	// to call default marshaller.
 	// Instead, we fill uTLS-specific structs and call uTLS marshaller.
-	// Only extensionCookie, extensionPreSharedKey, extensionKeyShare, extensionEarlyData, extensionSupportedVersions,
+	// Only ExtensionCookie, ExtensionPreSharedKey, ExtensionKeyShare, ExtensionEarlyData, ExtensionSupportedVersions,
 	// and utlsExtensionPadding are supposed to change
 	if hs.uconn != nil {
-		if hs.uconn.ClientHelloID != HelloGolang {
+		if hs.uconn.ClientHelloID.Str() != HelloGolang.Str() {
 			keyShareExtFound := false
 			for _, ext := range hs.uconn.Extensions {
 				// new ks seems to be generated either way
