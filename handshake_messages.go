@@ -1545,6 +1545,7 @@ func (m *certificateMsg) unmarshal(data []byte) bool {
 }
 
 type certificateMsgTLS13 struct {
+	original     []byte // [uTLS]
 	certificate  Certificate
 	ocspStapling bool
 	scts         bool
@@ -1607,7 +1608,7 @@ func marshalCertificate(b *cryptobyte.Builder, certificate Certificate) {
 }
 
 func (m *certificateMsgTLS13) unmarshal(data []byte) bool {
-	*m = certificateMsgTLS13{}
+	*m = certificateMsgTLS13{original: data} // [uTLS]
 	s := cryptobyte.String(data)
 
 	var context cryptobyte.String
@@ -1623,6 +1624,18 @@ func (m *certificateMsgTLS13) unmarshal(data []byte) bool {
 
 	return true
 }
+
+// [UTLS SECTION BEGINS]
+// readServerCertificate reads the Certificate message with readHandshake(nil), so that a
+// CompressedCertificate can be hashed as received, and hashes it later with transcriptMsg.
+// marshal does not reproduce every message: it writes the leaf's OCSP staple before its
+// SCTs, and drops unknown extensions and extensions on other certificates. A server that
+// sends SCTs first then fails CertificateVerify, so the transcript takes the wire bytes.
+func (m *certificateMsgTLS13) originalBytes() []byte {
+	return m.original
+}
+
+// [UTLS SECTION ENDS]
 
 func unmarshalCertificate(s *cryptobyte.String, certificate *Certificate) bool {
 	var certList cryptobyte.String
